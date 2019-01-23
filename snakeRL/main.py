@@ -20,7 +20,7 @@ class Snake:
     def __init(self, game_state):
         self.len = 1
         self.position = [self.findRandomSpot(game_state)]
-        self.last_action = 
+        self.last_action = Action.UP
 
     def findRandomSpot(game_state):
         # find random index in free spaces
