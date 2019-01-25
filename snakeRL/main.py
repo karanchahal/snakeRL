@@ -4,6 +4,7 @@ CONFIG
 import random
 from enum import Enum
 import pygame 
+import math
 
 class Item(Enum):
     BACKGROUND = 0
@@ -59,7 +60,7 @@ class GameState:
         self.num_snakes = num_snakes
         self.total_fruit = fruit_limit
         self.snake_store = []
-        self.occupancy_grid = [0] * board_size*board_size # table of size n by n where n is board size
+        self.occupancy_grid = [Item.BACKGROUND] * board_size*board_size # table of size n by n where n is board size
 
         self.initSnakes()
         self.initFruits()
@@ -70,7 +71,7 @@ class GameState:
             self.snake_store.append(s)
         
     def getFreeSpaces(self):
-        indices = [i for i, x in enumerate(self.occcupancy_grid) if x == 0]
+        indices = [i for i, x in enumerate(self.occcupancy_grid) if x == Item.BACKGROUND]
         return indices
 
     def updateGrid(self, position, itemType): 
@@ -88,12 +89,12 @@ class GameState:
             free_spaces = self.getFreeSpaces()
             list_i = random.sample(range(len(free_spaces)), k=fruits_needed)
             for i in list_i:
-                self.updateGrid(i,2)
+                self.updateGrid(i,Item.FRUIT)
 
     def update(self):
         for s in self.snake_store:
             for i in s.position:
-                self.occupancy_grid[i] = 1
+                self.occupancy_grid[i] = Item.SNAKE
 
 class GameRunner:
 
@@ -142,64 +143,55 @@ class Sprite:
 
 class Renderer:
 
-    def __init__(self, board_size, num_snakes, fruit_limit, scale=20, screen_size=20):
+    def __init__(self, board_size, num_snakes, scale=20, screen_size=20):
 
         self.scale = scale
         self.board_size = board_size
         self.num_snakes = num_snakes
-        self.total_fruit = fruit_limit
-        self.surface_grid = [0]*board_size*board_size
-        self.old_grid = [0]*board_size*board_size
-        self.free_snake_surface_buffer = []
-        self.free_fruit_surface_buffer = []
         self.screen_size = screen_size
-
+        
         self.initSurfaces()
     
     def initSurfaces(self):
-        for i in range(self.num_snakes):
-            snake = Sprite(itemType=Item.SNAKE)
-            self.free_snake_surface_buffer.append(snake)
-        
-        for i in range(self.total_fruit):
-            fruit = Sprite(itemType=Item.FRUIT)
-            self.free_fruit_surface_buffer.append(fruit)
 
         self.screen = pygame.display.set_mode((self.screen_size*self.scale, self.screen_size*self.scale))
         self.background =  pygame.Surface(self.screen.get_size())
         self.background.fill(Color.GREEN)
         self.screen.blit(self.background, (0, 0))
+
         pygame.display.update()
 
-    def step(self, positions_changed, new_grid):
-        for p in positions_changed:
-            item = new_grid[p]
-            oldItem = self.old_grid[p]
-            if item == Item.BACKGROUND:
-                if oldItem.itemType == Item.SNAKE:
-                    self.free_snake_surface_buffer + [self.surface_grid[p]]
-                    self.screen.blit(self.background, oldItem.pos, oldItem.pos)
-                if oldItem.itemType == Item.FRUIT:
-                    self.free_fruit_surface_buffer + [self.surface_grid[p]]
-                    self.screen.blit(self.background, oldItem.pos, oldItem.pos)
-            
+    def index2coordinates(self, i):
         
-        for p in positions_changed:
-            item = new_grid[p]
-            oldItem = self.old_grid[p]
-            if item != Item.BACKGROUND and oldItem != Item.BACKGROUND:
-                if item.itemType == Item.SNAKE:
-                    if oldItem == Item.FRUIT:
-                        self.free_fruit_surface_buffer + [self.surface_grid[p]]
-            
-        for p in positions_changed:
-            item = new_grid[p]
-            oldItem = self.old_grid[p]
-            if item == Item.SNAKE:
-                # colour position with snake
+        i = i+1
+        x = math.floor(i/self.board_size)
+        y = i % self.board_size
+
+        if(y == 0):
+            y = self.board_size
+        if (x == 0):
+            x = 1
+        return x-1, y-1
+
+
+
+    def step(self, new_grid):
+
+        # case when snake eats a background comes after snake has moved from position
+        # put snake in buffer and put background at that position
+        for i in range(len(new_grid)):
+            item = new_grid[i]
+            x,y = self.index2coordinates(i)
+            if item == Item.BACKGROUND:
+                self.screen.blit(self.background, (x,y), (x,y))
             elif item == Item.FRUIT:
-                # colour position with fruit
-            
+                fruit = Sprite(itemType=Item.FRUIT)
+                self.screen.blit(fruit.surface, (x,y), (x,y))
+            elif item == Item.SNAKE:
+                snake = Sprite(itemType=Item.SNAKE)
+                self.screen.blit(snake.surface, (x,y), (x,y))
+
+        pygame.display.update()
 
 
     
