@@ -4,7 +4,7 @@ CONFIG
 import random
 import pygame 
 import math
-from enums import Action
+from items import Action
 from game import GameRunner
 
 

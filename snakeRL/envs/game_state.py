@@ -1,5 +1,5 @@
-from enums import Item
-from snake import Snake
+from snakeRL.envs.items import Item
+from snakeRL.envs.snake import Snake
 import random
 
 class GameState:

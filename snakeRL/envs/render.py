@@ -1,5 +1,5 @@
 import pygame 
-from enums import Item
+from snakeRL.envs.items import Item
 import math
 
 class Sprite:

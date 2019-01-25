@@ -1,4 +1,4 @@
-from enums import Item, Action
+from snakeRL.envs.items import Item, Action
 import random
 import math
 

@@ -1,7 +1,7 @@
-from game_state import GameState
-from render import Renderer
-from snake import Snake
-from enums import Item
+from snakeRL.envs.game_state import GameState
+from snakeRL.envs.render import Renderer
+from snakeRL.envs.snake import Snake
+from snakeRL.envs.items import Item
 
 class GameRunner:
 
@@ -10,6 +10,7 @@ class GameRunner:
         self.game_state = GameState(board_size, num_snakes, fruit_limit)
         self.renderer = Renderer(board_size=board_size)
         self.renderer.step(self.game_state.occupancy_grid)
+        self.occupancy_grid = self.game_state.occupancy_grid
         # init game state
         # init snakes and everything
 
@@ -34,6 +35,7 @@ class GameRunner:
         observation, reward, done, overall_board
         '''
         reward = 0
+        done = False
         # action is last action if no user input
         dead_snakes = []
         for i,s in enumerate(self.game_state.snake_store):
@@ -52,18 +54,18 @@ class GameRunner:
             self.game_state.snake_store = [s for s in self.game_state.snake_store if isinstance(s,Snake)]
 
         if len(self.game_state.snake_store) == 0: # for dead snake
-            reward = -100
-        
-        # randomly generate fruit if fruit limit has decreased
-        won = self.game_state.replinishFruits()
-        if won:
-            reward = 100
+            reward = 0
+            done = True
+        else: 
+            # randomly generate fruit if fruit limit has decreased
+            done = self.game_state.replinishFruits()
+            if done:
+                reward = 100
 
         self.game_state.update()
-
-        if render:
-            self.renderer.step(self.game_state.occupancy_grid) # it needs the exact locations thaat have changed, snakes removed, snake added, fruit removed, fruit added
-
         state = self.getStateForPolicy()
 
-        return self.game_state.occupancy_grid, state, reward, won
+        return self.game_state.occupancy_grid, state, reward, done
+    
+    def render(self):
+        self.renderer.step(self.game_state.occupancy_grid) # it needs the exact locations thaat have changed, snakes removed, snake added, fruit removed, fruit added
