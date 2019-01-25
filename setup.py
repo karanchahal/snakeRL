@@ -15,7 +15,8 @@ setup(
     version=__version__,#'0.0.1',
     install_requires=[
         'gym[atari,box2d,classic_control]>=0.10.8',
-        'pygame'
+        'pygame',
+        'numpy'
     ],
     description="Snake Game Multi Agent Setting with Deep RL",
     author="Karanbir Chahal",

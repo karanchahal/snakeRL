@@ -54,7 +54,6 @@ class GameState:
 
             a = random.sample(range(len(free_spaces)), k=fruits_needed)
             listi = [free_spaces[i] for i in a]
-            print(listi)
             for i in listi:
                 self.updateGrid(i,Item.FRUIT)
                 self.fruit_store.append(i)

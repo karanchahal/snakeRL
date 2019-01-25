@@ -7,8 +7,6 @@ import math
 from items import Action
 from game import GameRunner
 
-
-
 game = GameRunner(board_size=3, num_snakes=1, fruit_limit=1)
 
 # reward structure

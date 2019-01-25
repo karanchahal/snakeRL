@@ -5,11 +5,13 @@ from snakeRL.envs.items import Item
 
 class GameRunner:
 
-    def __init__(self, board_size=10, num_snakes=1, fruit_limit=1):
+    def __init__(self, board_size=10, num_snakes=1, fruit_limit=1, render=False):
     
         self.game_state = GameState(board_size, num_snakes, fruit_limit)
-        self.renderer = Renderer(board_size=board_size)
-        self.renderer.step(self.game_state.occupancy_grid)
+        self.isRender = render
+        if self.isRender:
+            self.renderer = Renderer(board_size=board_size)
+            self.renderer.step(self.game_state.occupancy_grid)
         self.occupancy_grid = self.game_state.occupancy_grid
         # init game state
         # init snakes and everything
@@ -68,4 +70,5 @@ class GameRunner:
         return self.game_state.occupancy_grid, state, reward, done
     
     def render(self):
-        self.renderer.step(self.game_state.occupancy_grid) # it needs the exact locations thaat have changed, snakes removed, snake added, fruit removed, fruit added
+        if self.isRender:
+            self.renderer.step(self.game_state.occupancy_grid) # it needs the exact locations thaat have changed, snakes removed, snake added, fruit removed, fruit added

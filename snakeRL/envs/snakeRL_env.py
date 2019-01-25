@@ -3,6 +3,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from snakeRL.envs.game import GameRunner
 from snakeRL.envs.items import Action
+import numpy as np
 
 class SnakeEnv(gym.Env):
     def __init__(self):
@@ -12,7 +13,7 @@ class SnakeEnv(gym.Env):
         self.num_snakes = 1
         self.fruit_limit = 1
 
-        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit)
+        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=True)
         
         self.occupancy_grid = self.game.occupancy_grid
         self.state = []
@@ -39,9 +40,9 @@ class SnakeEnv(gym.Env):
 
         self.state = state
         self.done = done 
-        self.reward += reward
+        self.reward = reward
 
-        return self.state, self.reward, self.done
+        return np.array(self.state,dtype=np.float32), self.reward, self.done, {}
 
     def reset(self):
 
@@ -50,11 +51,13 @@ class SnakeEnv(gym.Env):
         self.num_snakes = 1
         self.fruit_limit = 1
 
-        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit)
+        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=True)
 
-        self.state = []
+        self.state = self.game.getStateForPolicy()
         self.reward = 0
         self.done = 0
+
+        return np.array(self.state,dtype=np.float32)
 
 
     def render(self, mode='human', close=False):
