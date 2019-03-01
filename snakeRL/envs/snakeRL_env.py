@@ -9,55 +9,53 @@ class SnakeEnv(gym.Env):
     def __init__(self):
         
         self.occupancy_grid = []
-        self.board_size = 3
-        self.num_snakes = 1
-        self.fruit_limit = 1
+        self.board_size = 5
+        self.num_snakes = 2
+        self.fruit_limit = 2
+        self.isRender = True
 
-        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=True)
+        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=self.isRender)
         
         self.occupancy_grid = self.game.occupancy_grid
-        self.state = []
-        self.reward = 0
-        self.done = 0
+        self.stateList = self.game.getAllSimplifiedSnakeStatesForPolicy()
+        self.rewardList = [0]*self.num_snakes
+        self.doneList = [False]*self.num_snakes
 
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=1,high=3, shape=(self.board_size*self.board_size,))
+        self.observation_space = spaces.Box(low=1,high=5, shape=(self.board_size*self.board_size,))
 
-    def step(self, action):
+    def step(self, actionList):
 
-        assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
+        # assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
 
-        if action == 0:
-            action = Action.UP
-        elif action == 1:
-            action = Action.DOWN
-        elif action == 2:
-            action = Action.LEFT
-        elif action == 3:
-            action = Action.RIGHT
+        formattedActionList = []
+        for action in actionList:
+            if action == 0:
+                formattedActionList.append(Action.UP)
+            elif action == 1:
+                formattedActionList.append(Action.DOWN)
+            elif action == 2:
+                formattedActionList.append(Action.LEFT)
+            elif action == 3:
+                formattedActionList.append(Action.RIGHT)
+        _, stateList, rewardList, doneList, game_end = self.game.step(actions=formattedActionList) # List of _, state, reward, done 
 
-        _, state, reward, done = self.game.step(actions=[action])
+        self.stateList = stateList
+        self.doneList = [True if b else a for a,b in zip(self.doneList, doneList)]
+        self.rewardList = [a+b for a,b in zip(self.rewardList, rewardList)]
 
-        self.state = state
-        self.done = done 
-        self.reward = reward
-
-        return np.array(self.state,dtype=np.float32), self.reward, self.done, {}
+        return self.stateList, self.rewardList, self.doneList, {'game_end':game_end} # send state array
 
     def reset(self):
 
         self.occupancy_grid = []
-        self.board_size = 3
-        self.num_snakes = 1
-        self.fruit_limit = 1
 
-        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=True)
+        self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=self.isRender)
+        self.stateList = self.game.getAllSimplifiedSnakeStatesForPolicy()
+        self.rewardList = [0]*self.num_snakes
+        self.doneList = [False]*self.num_snakes
 
-        self.state = self.game.getStateForPolicy()
-        self.reward = 0
-        self.done = 0
-
-        return np.array(self.state,dtype=np.float32)
+        return np.array(self.stateList,dtype=np.float32) # Todo send state array for multiple agents
 
 
     def render(self, mode='human', close=False):

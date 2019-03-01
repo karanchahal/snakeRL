@@ -66,11 +66,12 @@ class Snake:
         err = False
         fruit_eaten = False
         if new_position == -1:
-            # see if snake goes out of bounds or crashes into another snake
+            # see if snake goes out of bounds
             err = True            
         else:
             dead, fruit_eaten = game_state.updateGrid(new_position, Item.SNAKE) # updates game board
             
+            # if crashes into other snake
             if dead:
                 err = True
             elif fruit_eaten:

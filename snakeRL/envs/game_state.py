@@ -32,13 +32,16 @@ class GameState:
         dead = False
         
         if self.occupancy_grid[position] == Item.SNAKE:
+            # snake exists in this position already so dead
             dead = True 
             return dead, fruit
 
         if itemType == Item.SNAKE and self.occupancy_grid[position] == Item.FRUIT:
             fruit = True
-            self.fruit_store = self.fruit_store[:-1]
-        self.occupancy_grid[position] = itemType
+            # remove from fruit store list
+            for i,pos in enumerate(self.fruit_store):
+                if pos == position:
+                    self.fruit_store = self.fruit_store[:i] + self.fruit_store[i+1:]
         return dead, fruit
 
     def replinishFruits(self):
@@ -55,20 +58,40 @@ class GameState:
             a = random.sample(range(len(free_spaces)), k=fruits_needed)
             listi = [free_spaces[i] for i in a]
             for i in listi:
-                self.updateGrid(i,Item.FRUIT)
-                self.fruit_store.append(i)
-
+                self.occupancy_grid[i] = Item.FRUIT # put fruit in this position
+                self.fruit_store.append(i) # add to list of fruit locations
         return won
 
     def update(self):
-
+        '''
+        Builds game state from scratch by referring to the snakes store and fruit store
+        Build one main state and several snake specific snake states for output observations
+        '''
         self.occupancy_grid = [Item.BACKGROUND] * self.board_size*self.board_size # table of size n by n where n is board size
         self.snake_head = [0] * self.board_size*self.board_size
+    
 
+        # Building one main occupancy grid reference
         for s in self.snake_store:
-            for i in s.position:
-                self.occupancy_grid[i] = Item.SNAKE
-            self.snake_head[s.position[-1]] = 1
+            if isinstance(s,Snake):
+                for i in s.position:
+                    self.occupancy_grid[i] = Item.SNAKE
+                self.snake_head[s.position[-1]] = Item.SNAKE_HEAD
         
+        # Populating fruit in grid
         for i in self.fruit_store:
             self.occupancy_grid[i] = Item.FRUIT
+
+    def snakeSpecificStates(self):
+        # Building env according to the view of each snake for each agent
+
+        snake_states = [0]*self.num_snakes
+        for j, s in enumerate(self.snake_store):
+            if isinstance(s,Snake):
+                snake_state = self.occupancy_grid.copy()
+                for i in s.position:
+                    snake_state[i] = Item.MY_SNAKE
+                snake_state[s.position[-1]] = Item.MY_SNAKE_HEAD
+                snake_states[j] = snake_state
+
+        return snake_states

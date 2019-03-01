@@ -4,6 +4,9 @@ class Item(Enum):
     BACKGROUND = 0
     SNAKE = 1
     FRUIT = 2
+    SNAKE_HEAD = 3
+    MY_SNAKE = 4
+    MY_SNAKE_HEAD = 5
 
 class Action(Enum):
     UP = 1
