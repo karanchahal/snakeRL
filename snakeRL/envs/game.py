@@ -28,9 +28,9 @@ class GameRunner:
             if item == Item.BACKGROUND:
                 state_grid.append(0)
             elif item == Item.FRUIT:
-                state_grid.append(1)
-            elif item == item.SNAKE:
                 state_grid.append(2)
+            elif item == item.SNAKE:
+                state_grid.append(1)
             elif item == item.SNAKE_HEAD:
                 state_grid.append(3)
             elif item == item.MY_SNAKE:
