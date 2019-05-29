@@ -12,7 +12,7 @@ class SnakeEnv(gym.Env):
         self.board_size = 5
         self.num_snakes = 2
         self.fruit_limit = 2
-        self.isRender = True
+        self.isRender = False
 
         self.game = GameRunner(board_size=self.board_size, num_snakes=self.num_snakes, fruit_limit=self.fruit_limit, render=self.isRender)
         
